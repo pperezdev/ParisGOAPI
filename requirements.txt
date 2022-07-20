@@ -1,0 +1,8 @@
+boto3
+elasticsearch==7.5.1
+pandas
+requests
+uuid
+psycopg2
+flask
+python-dotenv

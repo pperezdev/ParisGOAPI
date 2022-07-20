@@ -1,0 +1,72 @@
+version: "3"
+
+services:
+  api:
+    build: .
+    container_name: apiback
+    ports:
+       - "7899:5000"
+    command: ["flask", "run", "--host=0.0.0.0", "-p 5000"]
+    volumes:
+      - ./app:/tmp/app
+      - ./data:/tmp/data
+    networks:
+      - esnet
+      
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.3.1
+    container_name: elasticsearch
+    environment:
+      - node.name=ws-es-node
+      - discovery.type=single-node
+      - cluster.name=ws-es-data-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - .:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    networks:
+      - esnet
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.3.1
+    container_name: kibana
+    environment:
+      SERVER_NAME: 127.0.0.1
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - esnet
+    depends_on:
+      - elasticsearch
+    restart: "unless-stopped"
+  valhalla:
+    image: gisops/valhalla:latest
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./custom_files/:/tmp/custom_files
+    environment:
+      # The tile_file must be located in the `custom_files` folder.
+      # The tile_file has priority and is used when valid.
+      # If the tile_file doesn't exist, the url is used instead.
+      # Don't blank out tile_url when you use tile_file and vice versa.
+      - tile_urls=https://download.geofabrik.de/europe/france/ile-de-france-latest.osm.pbf
+      # Get correct bounding box from e.g. https://boundingbox.klokantech.com/
+      - use_tiles_ignore_pbf=True
+      - force_rebuild=False
+      - force_rebuild_elevation=False
+      - build_elevation=False
+      - build_admins=True
+      - build_time_zones=Tru
+    networks:
+      - esnet
+networks:
+  esnet:
+    driver: bridge
