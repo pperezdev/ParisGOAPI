@@ -6,7 +6,7 @@ def get_file(get_url, output_file, s3_folder):
     download_file_csv(get_url, output_file)
     s3 = s3Insert()
 
-    file_binary = open(f"D:\projetAnnuel\ParisGOAPI\{output_file}", "rb").read()
+    file_binary = open(f"..\{output_file}", "rb").read()
     s3.upload_my_file("s3pa4dd01", s3_folder, file_binary, output_file.split('/')[1])
 
 def quefaire():

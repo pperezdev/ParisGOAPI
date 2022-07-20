@@ -12,7 +12,7 @@ def connect_sql():
 def csv_to_sql(output_file, header_took, database_table, header_sql, mapped_column=None):
     conn = connect_sql()
     cursor = conn.cursor()
-    filtered_df = pd.read_csv(f"D:\projetAnnuel\ParisGOAPI\data\{output_file}", encoding='utf8', usecols=header_took, sep = ';')
+    filtered_df = pd.read_csv(f"../../data\{output_file}", encoding='utf8', usecols=header_took, sep = ';')
     filtered_df = filtered_df.fillna("")
     if mapped_column != None:
         for col in mapped_column:
